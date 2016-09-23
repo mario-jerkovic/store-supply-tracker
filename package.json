@@ -1,0 +1,53 @@
+{
+  "name": "store-supply-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:vendor": "webpack --display-chunks --colors --progress --config webpack.dll.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mario-jerkovic/store-supply-tracker.git"
+  },
+  "author": "Mario Jerkovic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mario-jerkovic/store-supply-tracker/issues"
+  },
+  "homepage": "https://github.com/mario-jerkovic/store-supply-tracker#readme",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "express": "^4.14.0",
+    "express-graphql": "^0.5.4",
+    "html-webpack-plugin": "^2.22.0",
+    "nodemon": "^1.10.2",
+    "react-transform-catch-errors": "^1.0.2",
+    "react-transform-hmr": "^1.0.4",
+    "redbox-react": "^1.3.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.1"
+  },
+  "dependencies": {
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-relay-plugin": "^0.9.3",
+    "babel-runtime": "^6.11.6",
+    "graphql": "^0.7.0",
+    "graphql-relay": "^0.4.3",
+    "material-ui": "^0.15.4",
+    "react": "^15.3.2",
+    "react-dom": "15.3.2",
+    "react-relay": "^0.9.3",
+    "react-relay-network-layer": "^1.3.2",
+    "react-router": "^2.7.0",
+    "react-router-relay": "^0.13.3",
+    "react-tap-event-plugin": "^1.0.0"
+  }
+}
