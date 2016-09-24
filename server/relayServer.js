@@ -11,9 +11,8 @@ import config from './config/environment';
 const proxy = httpProxy.createProxyServer();
 
 const proxyOptions = [
-	{path: '/graphql', target: `http://localhost:${config.apiPort}/`},
-	{path: '/batch', target: `http://localhost:${config.apiPort}/`},
-	{path: '/auth/login', target: `http://localhost:${config.apiPort}/`}
+	{ path: '/graphql', target: `http://localhost:${config.apiPort}/` },
+	{ path: '/batch', target: `http://localhost:${config.apiPort}/` }
 ];
 
 export const startRelayServer = () => {

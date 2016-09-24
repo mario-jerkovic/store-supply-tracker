@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "",
+    "start": "npm run build:vendor && nodemon --watch \"server/**/*.js\" --exec \"npm run build:schema && babel-node server/index.js\"",
     "build:vendor": "webpack --display-chunks --colors --progress --config webpack.dll.config.js",
     "build:schema": "babel-node server/utils/updateSchema.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -48,7 +48,9 @@
     "graphql": "^0.7.0",
     "graphql-relay": "^0.4.3",
     "http-proxy": "^1.15.1",
+    "knex": "^0.12.1",
     "material-ui": "^0.15.4",
+    "mysql": "^2.11.1",
     "react": "^15.3.2",
     "react-dom": "15.3.2",
     "react-relay": "^0.9.3",

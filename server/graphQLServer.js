@@ -13,15 +13,15 @@ export const startGraphQLServer = () => {
 	graphQLServer.use(bodyParser.urlencoded({ extended: false }));
 
 	graphQLServer.use('/graphql', (req, res, next) => {
-		return graphQLHTTP({ schema, graphiql: false })(req, res, next);
+		return graphQLHTTP({ schema, rootValue: {}, context: {}, graphiql: false })(req, res, next);
 	});
 
 	graphQLServer.use('/batch', (req, res, next) => {
-		return graphqlBatchHTTPWrapper(graphQLHTTP({ schema, graphiql: false }))(req, res, next);
+		return graphqlBatchHTTPWrapper(graphQLHTTP({ schema, rootValue: {}, context: {}, graphiql: false }))(req, res, next);
 	});
 
 	if (config.env === 'development') {
-		graphQLServer.use('/graphiql', graphQLHTTP({ schema, graphiql: true, pretty: true }));
+		graphQLServer.use('/graphiql', graphQLHTTP({ schema, rootValue: {}, context: {}, graphiql: true, pretty: true }));
 	}
 
 	return graphQLServer;

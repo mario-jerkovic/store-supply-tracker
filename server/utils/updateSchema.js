@@ -8,6 +8,7 @@ import {
 } from 'graphql/utilities';
 
 import { schema }from '../data';
+import { database } from '../data/database';
 
 const jsonFile = path.join(__dirname, '../data/schema.json');
 const graphQLFile = path.join(__dirname, '../data/schema.graphql');
@@ -20,6 +21,11 @@ async function updateSchema() {
 		fs.writeFileSync(graphQLFile, printSchema(schema));
 
 		console.log(chalk.green('[updateSchema]  schema has been regenerated'));
+		
+		// Knexs keep connection alive which makes this process hanging
+		// we are explicitly destroying connection pool after schema is
+		// generated so program can end, if it's called from the command line
+		if (!module.parent) database.destroy();
 	} catch (err) {
 		console.error(chalk.red(err.stack));
 	}
