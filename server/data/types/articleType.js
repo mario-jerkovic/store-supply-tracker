@@ -8,11 +8,12 @@ import {
 import {
 	fromGlobalId,
 	globalIdField,
+	connectionArgs,
 	connectionDefinitions,
 } from 'graphql-relay';
 
 import Article from '../models/Article';
-import { nodeInterface } from '../defaultDefinitions';
+import { nodeInterface, totalCountType, connectionWithCountDefinition } from '../schema';
 
 export const articleType = new GraphQLObjectType({
 	name: 'Article',
@@ -43,7 +44,11 @@ export const articleType = new GraphQLObjectType({
 export const {
 	connectionType: articleConnection,
 	edgeType: articleEdge
-} = connectionDefinitions({ name: 'Article', nodeType: articleType });
+} = connectionDefinitions({
+	name: 'Article',
+	nodeType: articleType ,
+	connectionFields: totalCountType
+});
 
 export const queryArticle = {
 	type: articleType,
@@ -52,7 +57,11 @@ export const queryArticle = {
 			type: new GraphQLNonNull(GraphQLID),
 		},
 	},
-	resolve: (rootValue, args, context, info) => {
-		return Article.findByID({ id: fromGlobalId(args.id).id });
-	},
+	resolve: (rootValue, args, context, info) => Article.findByID({ id: fromGlobalId(args.id).id }),
+};
+
+export const queryArticleConnection = {
+	type: articleConnection,
+	args: connectionArgs,
+	resolve: (rootValue, args, context, info) => connectionWithCountDefinition(Article.tableName, args, context, info)
 };

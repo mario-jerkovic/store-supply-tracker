@@ -12,7 +12,7 @@ import {
 } from 'graphql-relay';
 
 import Receipt from '../models/Receipt';
-import { queryArticle } from '../schema';
+import { articleType } from '../schema';
 import { nodeInterface } from '../defaultDefinitions';
 
 export const receiptType = new GraphQLObjectType({
@@ -20,12 +20,15 @@ export const receiptType = new GraphQLObjectType({
 	description: 'Single receipt',
 	fields: () =>({
 		id: globalIdField('Receipt', ({ receipt_id }) => receipt_id),
-		article: queryArticle,
+		article: {
+			type: new GraphQLNonNull(articleType),
+			resolve: ({ article }) => article
+		},
 		price: {
 			type: new GraphQLNonNull(GraphQLFloat),
 			resolve: ({ receipt_price }) => receipt_price,
 		},
-		total: {
+		totalPrice: {
 			type: new GraphQLNonNull(GraphQLFloat),
 			resolve: ({ receipt_total }) => receipt_total
 		},
@@ -53,7 +56,5 @@ export const queryReceipt = {
 			type: new GraphQLNonNull(GraphQLID),
 		},
 	},
-	resolve: (rootValue, args, context, info) => {
-		return Receipt.findByID({ id: fromGlobalId(args.id).id });
-	},
+	resolve: (rootValue, args, context, info) => Receipt.findByID({ id: fromGlobalId(args.id).id }),
 };
