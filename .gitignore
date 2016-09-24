@@ -85,3 +85,5 @@ fabric.properties
 
 # Project files
 vendor_dll/
+server/data/schema.json
+server/data/schema.graphql
