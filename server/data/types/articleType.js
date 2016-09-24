@@ -46,8 +46,8 @@ export const {
 	edgeType: articleEdge
 } = connectionDefinitions({
 	name: 'Article',
-	nodeType: articleType ,
-	connectionFields: totalCountType
+	nodeType: articleType,
+	connectionFields: totalCountType,
 });
 
 export const queryArticle = {
@@ -57,11 +57,11 @@ export const queryArticle = {
 			type: new GraphQLNonNull(GraphQLID),
 		},
 	},
-	resolve: (rootValue, args, context, info) => Article.findByID({ id: fromGlobalId(args.id).id }),
+	resolve: (rootValue, args, context, info) => Article.findByID(args),
 };
 
 export const queryArticleConnection = {
 	type: articleConnection,
 	args: connectionArgs,
-	resolve: (rootValue, args, context, info) => connectionWithCountDefinition(Article.tableName, args, context, info)
+	resolve: (rootValue, args, context, info) => connectionWithCountDefinition(Article, args, context, info)
 };

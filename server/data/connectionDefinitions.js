@@ -17,10 +17,10 @@ export const totalCountType = {
 	}
 };
 
-export const connectionWithCountDefinition = async (tableName, args, context, info) => {
+export const connectionWithCountDefinition = async (model, args, context, info) => {
 	let offset = 0;
-	const limit = args.first || args.last || 0;
-	const totalCount = await database(tableName).count().then((res) => res[0]['count(*)']);
+	const totalCount = await database(model.tableName).count().then((res) => res[0]['count(*)']);
+	const limit = args.first || args.last || totalCount;
 	
 	if (args.after) {
 		offset = cursorToOffset(args.after) + 1;
@@ -30,7 +30,11 @@ export const connectionWithCountDefinition = async (tableName, args, context, in
 		offset = Math.max(totalCount - limit, 0)
 	}
 	
-	const result = await database(tableName).select().limit(limit).offset(offset);
+	const result = await model.tableInstance().select().limit(limit).offset(offset);
+	
+	if (model.joinedResources) {
+		// TODO query for joined resources
+	}
 	
 	return {
 		totalCount,

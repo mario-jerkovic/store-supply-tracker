@@ -8,7 +8,7 @@ if (config.env === 'development') {
 		const hrstart = process.hrtime();
 		builder.on('end', () => {
 			const hrend = process.hrtime(hrstart);
-			console.log('Query (Execution time (hr): %ds %dms) \n%s;', hrend[0], hrend[1] / 1000000, builder.toString());
+			console.log(`Query "${builder.toString()}" (Execution time (hr): ${hrend[0]} ${hrend[1] / 1000000})`);
 		});
 	});
 }

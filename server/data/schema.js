@@ -9,14 +9,16 @@ import {
 import { nodeField, nodeInterface } from './defaultDefinitions';
 export * from './defaultDefinitions';
 
-import { totalCountType, connectionWithCountDefinition } from './connectionDefinitions';
 export * from './connectionDefinitions';
 
 import { queryArticle, queryArticleConnection } from './types/articleType';
 export * from './types/articleType';
 
-import { queryReceipt } from './types/receiptType';
+import { queryReceipt, queryReceiptConnection } from './types/receiptType';
 export * from './types/receiptType';
+
+import { queryReceiptArticleMap } from './types/receiptArticleMapType';
+export * from './types/receiptArticleMapType';
 
 const viewerType = new GraphQLObjectType({
 	name: 'Viewer',
@@ -25,9 +27,12 @@ const viewerType = new GraphQLObjectType({
 		article: queryArticle,
 		articleConnection: queryArticleConnection,
 		receipt: queryReceipt,
+		receiptConnection: queryReceiptConnection,
+		receiptArticleMap: queryReceiptArticleMap,
 	}),
 	interfaces: [nodeInterface],
 });
+
 /**
  * This is the type that will be the root of our query,
  * and the entry point into our schema.

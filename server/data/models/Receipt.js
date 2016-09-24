@@ -1,21 +1,25 @@
+import { fromGlobalId } from 'graphql-relay';
 import { database } from '../database';
-import Article from './Article';
 
 class Receipt {
 	static tableName = 'receipt';
 	
+	static tableInstance = () => database(Receipt.tableName);
+	
 	static findByID = async ({ id }) => {
-		const receiptResult = await database.select().from(Receipt.tableName).where(`${Receipt.tableName}_id`, id).then(res => res[0]);
-		const articleResult = await Article.findByID({ id: receiptResult.article_id });
+		const initQuery = Receipt.tableInstance().select();
+		
+		if (id) {
+			initQuery.where(`${Receipt.tableName}_id`, fromGlobalId(id).id);
+		}
 		
 		return {
-			...receiptResult,
-			article: articleResult
+			...await initQuery.then(result => result[0]),
 		}
 	};
 	
 	static findAll = async () => {
-		return await database.select().from(Receipt.tableName).then(res => res);
+		return await Receipt.tableInstance().select().then(result => result);
 	};
 }
 
