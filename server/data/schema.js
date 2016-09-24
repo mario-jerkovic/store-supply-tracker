@@ -9,7 +9,10 @@ import {
 import { nodeField, nodeInterface } from './defaultDefinitions';
 export * from './defaultDefinitions';
 
-import { queryArticle } from './types/articleType';
+import { totalCountType, connectionWithCountDefinition } from './connectionDefinitions';
+export * from './connectionDefinitions';
+
+import { queryArticle, queryArticleConnection } from './types/articleType';
 export * from './types/articleType';
 
 import { queryReceipt } from './types/receiptType';
@@ -20,6 +23,7 @@ const viewerType = new GraphQLObjectType({
 	fields: () => ({
 		id: globalIdField('Viewer'),
 		article: queryArticle,
+		articleConnection: queryArticleConnection,
 		receipt: queryReceipt,
 	}),
 	interfaces: [nodeInterface],
@@ -39,9 +43,7 @@ const queryType = new GraphQLObjectType({
 	fields: () => ({
 		viewer: {
 			type: viewerType,
-			resolve: (rootValue, args, context, info) => {
-				return { id: "userID" };
-			}
+			resolve: (rootValue, args, context, info) => ({ id: "userID" })
 		},
 		
 		node: nodeField,

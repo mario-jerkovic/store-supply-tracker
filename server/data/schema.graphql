@@ -8,10 +8,46 @@ type Article implements Node {
   updated: String
 }
 
+# A connection to a list of items.
+type ArticleConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ArticleEdge]
+
+  # The number of nodes in edges array.
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type ArticleEdge {
+  # The item at the end of the edge
+  node: Article
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
 # An object with an ID
 interface Node {
   # The id of the object.
   id: ID!
+}
+
+# Information about pagination in a connection.
+type PageInfo {
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
 }
 
 type Query {
@@ -28,9 +64,9 @@ type Query {
 type receipt implements Node {
   # The ID of an object
   id: ID!
-  article(id: ID!): Article
+  article: Article!
   price: Float!
-  total: Float!
+  totalPrice: Float!
   created: String!
   updated: String
 }
@@ -39,5 +75,6 @@ type Viewer implements Node {
   # The ID of an object
   id: ID!
   article(id: ID!): Article
+  articleConnection(after: String, first: Int, before: String, last: Int): ArticleConnection
   receipt(id: ID!): receipt
 }
