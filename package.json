@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build:vendor && nodemon --watch \"server/**/*.js\" --exec \"npm run build:schema && babel-node server/index.js\"",
+    "start": "webpack --display-chunks --colors --progress --config webpack.dll.config.js",
     "build:vendor": "webpack --display-chunks --colors --progress --config webpack.dll.config.js",
     "build:schema": "babel-node server/utils/updateSchema.js",
     "test": "echo \"Error: no test specified\" && exit 1"
