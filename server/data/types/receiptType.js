@@ -1,6 +1,5 @@
 import {
 	GraphQLID,
-	GraphQLInt,
 	GraphQLFloat,
 	GraphQLString,
 	GraphQLNonNull,
@@ -62,7 +61,7 @@ export const queryReceipt = {
 			type: new GraphQLNonNull(GraphQLID),
 		},
 	},
-	resolve: (rootValue, args, context, info) => Receipt.findByID(args),
+	resolve: (rootValue, args, context, info) => Receipt.findByID({ id: fromGlobalId(args.id).id }),
 };
 
 export const queryReceiptConnection = {

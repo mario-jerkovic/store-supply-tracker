@@ -30,10 +30,10 @@ export const connectionWithCountDefinition = async (model, args, context, info) 
 		offset = Math.max(totalCount - limit, 0)
 	}
 	
-	const result = await model.tableInstance().select().limit(limit).offset(offset);
+	let result = await model.tableInstance().select().limit(limit).offset(offset);
 	
 	if (model.joinedResources) {
-		// TODO query for joined resources
+		result = result.map((item) => Object.assign(item, model.joinedResources(item)));
 	}
 	
 	return {

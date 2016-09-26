@@ -6,6 +6,7 @@ import {
 	GraphQLObjectType,
 } from 'graphql';
 import {
+	fromGlobalId,
 	globalIdField,
 	connectionArgs,
 	connectionDefinitions,
@@ -21,7 +22,7 @@ import {
 	connectionWithCountDefinition
 } from '../schema';
 
-export const receiptArticleType = new GraphQLObjectType({
+export const receiptArticleMapType = new GraphQLObjectType({
 	name: 'ReceiptArticleMap',
 	description: 'Mapping between Receipt and Article',
 	fields: () =>({
@@ -55,16 +56,16 @@ export const receiptArticleType = new GraphQLObjectType({
 });
 
 export const {
-	connectionType: receiptArticleConnection,
-	edgeType: receiptArticleEdge
+	connectionType: receiptArticleMapConnection,
+	edgeType: receiptArticleMapEdge
 } = connectionDefinitions({
 	name: 'ReceiptArticleMap',
-	nodeType: receiptArticleType,
+	nodeType: receiptArticleMapType,
 	connectionFields: totalCountType,
 });
 
 export const queryReceiptArticleMap = {
-	type: receiptArticleType,
+	type: receiptArticleMapType,
 	args: {
 		id: {
 			type: GraphQLID,
@@ -76,5 +77,23 @@ export const queryReceiptArticleMap = {
 			type: GraphQLID,
 		},
 	},
-	resolve: (rootValue, args, context, info) => ReceiptArticleMap.findByID(args),
+	resolve: (rootValue, args, context, info) => {
+		const ids = {};
+
+		if (args.id) {
+			ids.id = fromGlobalId(args.id).id;
+		} else if (args.receiptID) {
+			ids.receiptID = fromGlobalId(args.receiptID).id
+		} else if (args.articleID) {
+			ids.articleID = fromGlobalId(args.articleID).id;
+		}
+
+		return ReceiptArticleMap.findByID(ids);
+	},
+};
+
+export const queryReceiptArticleMapConnection = {
+	type: receiptArticleMapConnection,
+	args: connectionArgs,
+	resolve: (rootValue, args, context, info) => connectionWithCountDefinition(ReceiptArticleMap, args, context, info)
 };

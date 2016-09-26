@@ -57,7 +57,7 @@ export const queryArticle = {
 			type: new GraphQLNonNull(GraphQLID),
 		},
 	},
-	resolve: (rootValue, args, context, info) => Article.findByID(args),
+	resolve: (rootValue, args, context, info) => Article.findByID({ id: fromGlobalId(args.id).id }),
 };
 
 export const queryArticleConnection = {

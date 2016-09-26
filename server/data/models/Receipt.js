@@ -1,4 +1,3 @@
-import { fromGlobalId } from 'graphql-relay';
 import { database } from '../database';
 
 class Receipt {
@@ -7,10 +6,11 @@ class Receipt {
 	static tableInstance = () => database(Receipt.tableName);
 	
 	static findByID = async ({ id }) => {
+
 		const initQuery = Receipt.tableInstance().select();
 		
 		if (id) {
-			initQuery.where(`${Receipt.tableName}_id`, fromGlobalId(id).id);
+			initQuery.where(`${Receipt.tableName}_id`, id);
 		}
 		
 		return {

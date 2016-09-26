@@ -17,7 +17,7 @@ export * from './types/articleType';
 import { queryReceipt, queryReceiptConnection } from './types/receiptType';
 export * from './types/receiptType';
 
-import { queryReceiptArticleMap } from './types/receiptArticleMapType';
+import { queryReceiptArticleMap, queryReceiptArticleMapConnection } from './types/receiptArticleMapType';
 export * from './types/receiptArticleMapType';
 
 const viewerType = new GraphQLObjectType({
@@ -29,6 +29,7 @@ const viewerType = new GraphQLObjectType({
 		receipt: queryReceipt,
 		receiptConnection: queryReceiptConnection,
 		receiptArticleMap: queryReceiptArticleMap,
+		receiptArticleMapConnection: queryReceiptArticleMapConnection,
 	}),
 	interfaces: [nodeInterface],
 });

@@ -1,4 +1,3 @@
-import { fromGlobalId } from 'graphql-relay';
 import { database } from '../database';
 import Receipt from './Receipt';
 import Article from './Article';
@@ -19,17 +18,16 @@ class ReceiptArticleMap {
 		const initQuery = ReceiptArticleMap.tableInstance().select();
 		
 		if (id) {
-			const extractedID = fromGlobalId(id).id.split(':');
+			const extractedID = id.split(':');
 			
 			initQuery.where(`${Receipt.tableName}_id`, extractedID[0]);
 			initQuery.where(`${Article.tableName}_id`, extractedID[1]);
 		} else if (receiptID) {
-			initQuery.where(`${Receipt.tableName}_id`, fromGlobalId(receiptID).id);
+			initQuery.where(`${Receipt.tableName}_id`, receiptID);
 		} else if (articleID) {
-			initQuery.where(`${Article.tableName}_id`, fromGlobalId(articleID).id);
+			initQuery.where(`${Article.tableName}_id`, articleID);
 		} else {
 			// TODO throw GraphQL error,
-			// TODO think about using only one argument adn dynamically change the query
 		}
 		
 		const result = await initQuery.then(result => result[0]);
