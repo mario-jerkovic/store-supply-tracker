@@ -1,24 +1,20 @@
 import React, { PropTypes } from 'react';
-import { MuiThemeProvider } from '../../common';
+import {
+  customTheme,
+  getMuiTheme,
+  MuiThemeProvider,
+} from '../../common';
 
-class App extends React.Component {
+const theme = getMuiTheme(customTheme);
 
-	static propTypes = {
-		children: PropTypes.element,
-	};
+const App = props => (
+  <MuiThemeProvider muiTheme={theme}>
+    {props.children}
+  </MuiThemeProvider>
+);
 
-	constructor(props) {
-		super(props);
-
-	}
-
-	render() {
-		return (
-			<MuiThemeProvider>
-				{this.props.children}
-			</MuiThemeProvider>
-		);
-	}
-}
+App.propTypes = {
+  children: PropTypes.element,
+};
 
 export default App;

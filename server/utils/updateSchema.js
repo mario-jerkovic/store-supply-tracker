@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 import { graphql } from 'graphql';
 import {
 	printSchema,
 	introspectionQuery,
 } from 'graphql/utilities';
 
+import logger from './logger';
 import { schema }from '../data';
 import { database } from '../data/database';
 
@@ -20,8 +20,8 @@ async function updateSchema() {
 		fs.writeFileSync(jsonFile, JSON.stringify(json, null, 2));
 		fs.writeFileSync(graphQLFile, printSchema(schema));
 
-		console.log(chalk.green('[updateSchema]  schema has been regenerated'));
-		
+    logger.info('Schema has been regenerated');
+
 		// Knexs keep connection alive which makes this process hanging
 		// we are explicitly destroying connection pool after schema is
 		// generated so program can end, if it's called from the command line

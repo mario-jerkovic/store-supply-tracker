@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import 'whatwg-fetch';
+import 'normalize.css';
 
 import React from 'react';
 import Relay from 'react-relay';
@@ -7,12 +8,12 @@ import ReactDOM from 'react-dom';
 import useRelay from 'react-router-relay';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import {
-	Router,
-	browserHistory,
-	applyRouterMiddleware,
+  Router,
+  browserHistory,
+  applyRouterMiddleware,
 } from 'react-router';
 
-import Routes from './routes/Route';
+import { Routes } from './routes';
 
 /**
  * Needed for onTouchTap
@@ -29,9 +30,9 @@ const rootNode = document.createElement('div');
 document.body.appendChild(rootNode);
 
 ReactDOM.render(
-	<Router
-		routes={Routes}
-		history={browserHistory}
-		render={applyRouterMiddleware(useRelay)}
-		environment={Relay.Store}
-	/>, rootNode);
+  <Router
+    routes={Routes}
+    history={browserHistory}
+    render={applyRouterMiddleware(useRelay)}
+    environment={Relay.Store}
+  />, rootNode);

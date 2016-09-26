@@ -1,2 +1,2 @@
-export { default as ViewComponent } from './ViewComponent';
-export { default as ViewContainer } from './ViewContainer';
+export ViewComponent from './ViewComponent';
+export ViewContainer from './ViewContainer';
