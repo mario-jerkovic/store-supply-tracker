@@ -35,7 +35,9 @@ export const startRelayServer = () => {
 			quiet: false,
 			noInfo: false,
 			hot: true,
-			historyApiFallback: true
+			host: '0.0.0.0',
+			historyApiFallback: true,
+			headers: { 'Access-Control-Allow-Origin': '*' }
 		});
 
 		// Serve static resources

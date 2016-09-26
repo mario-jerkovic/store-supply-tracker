@@ -9,7 +9,7 @@ module.exports = {
 	entry: {
 		app: [
 			// The script refreshing the browser on none hot updates
-			'webpack-dev-server/client?http://localhost:8080',
+			'webpack-dev-server/client?http://0.0.0.0:8080',
 			'webpack/hot/only-dev-server',
 			path.join(__dirname, 'client/index.js')
 		]

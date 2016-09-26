@@ -12,12 +12,14 @@ module.exports = {
 			'react-relay',
 			'react-router',
 			'react-router-relay',
+			'react-tap-event-plugin',
 			'react-relay-network-layer',
-			'error-stack-parser',
 			'redbox-react',
 			'react-transform-catch-errors',
 			'react-transform-hmr',
 			'babel-runtime/core-js',
+			'babel-polyfill',
+			'whatwg-fetch',
 		]
 	},
 	output: {
