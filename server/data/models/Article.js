@@ -1,4 +1,3 @@
-import { fromGlobalId } from 'graphql-relay';
 import { database } from '../database';
 
 class Article {
@@ -10,7 +9,7 @@ class Article {
 		const initQuery = Article.tableInstance().select();
 		
 		if (id) {
-			initQuery.where(`${Article.tableName}_id`, fromGlobalId(id).id);
+			initQuery.where(`${Article.tableName}_id`, id);
 		}
 		
 		return {

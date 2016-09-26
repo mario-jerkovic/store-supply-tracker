@@ -1,12 +1,10 @@
 import React, { PropTypes } from 'react';
+import { MuiThemeProvider } from '../../common';
 
 class App extends React.Component {
 
 	static propTypes = {
-		children: PropTypes.elements,
-		viewer: PropTypes.shape({
-			id: PropTypes.string,
-		}).isRequired,
+		children: PropTypes.element,
 	};
 
 	constructor(props) {
@@ -16,9 +14,9 @@ class App extends React.Component {
 
 	render() {
 		return (
-			<div>
+			<MuiThemeProvider>
 				{this.props.children}
-			</div>
+			</MuiThemeProvider>
 		);
 	}
 }

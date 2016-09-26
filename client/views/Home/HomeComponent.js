@@ -12,7 +12,11 @@ class Home extends React.Component {
 	}
 
 	render() {
-		return null;
+		return (
+			<div>
+				{this.props.viewer.id}
+			</div>
+		);
 	}
 }
 

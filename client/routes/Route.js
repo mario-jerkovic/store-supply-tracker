@@ -6,12 +6,15 @@ import {
 } from 'react-router';
 
 import ViewerQuery from './ViewerQuery';
-import { AppContainer } from '../views/App';
+import { AppComponent } from '../views/App';
 import { HomeContainer } from '../views/Home';
+import { ViewContainer } from '../views/View';
 
 export default (
-	<Route path='/' component={AppContainer} queries={ViewerQuery}>
-		<IndexRoute component={HomeContainer} queries={ViewerQuery} />
-		<Redirect from='*' to='/' />
+	<Route component={AppComponent}>
+		<Route path='/' component={ViewContainer} queries={ViewerQuery}>
+			<IndexRoute component={HomeContainer} queries={ViewerQuery} />
+			<Redirect from='*' to='/' />
+		</Route>
 	</Route>
 );
