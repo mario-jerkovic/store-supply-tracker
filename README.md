@@ -1,7 +1,8 @@
 > This project is just made for fun :). This shows best practises that I have learned over past 
   year, playing around with React.js, Relay,js and GraphQL. Fell free to clone, fork or 
   submit PR to correct things that I have made wrong or that could be done better.
-  I am allays opened to learn something new. ENJOY!
+  I am allays opened to learn something new. THIS IS STILL WORK IN PROGRESS, and I am updating it on my free time. More 
+  features will come like pagination with relay, full feature Material Design Table, .... ENJOY!
 
 ## Usage
 
