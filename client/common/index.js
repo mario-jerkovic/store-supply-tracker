@@ -1,6 +1,6 @@
 export AppBar from './AppBar';
 export Drawer from './Drawer';
-export { ConnectionRow, ConnectionTable } from './ConnectionTable';
+export * from './ConnectionTable';
 export customTheme from './theme';
 
 export Paper from 'material-ui/Paper';

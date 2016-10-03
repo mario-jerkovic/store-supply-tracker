@@ -8,9 +8,23 @@
   "rules": {
     "comma-dangle": 0,
     "max-len": 0,
-    "jsx-quotes": [2, "prefer-double"],
+    "jsx-quotes": [
+      2,
+      "prefer-double"
+    ],
+    "no-trailing-spaces": [
+      2,
+      {
+        "skipBlankLines": true
+      }
+    ],
     "generator-star-spacing": 0,
-    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-plusplus": [
+      "error",
+      {
+        "allowForLoopAfterthoughts": true
+      }
+    ],
     "react/jsx-no-bind": 0,
     "react/prefer-stateless-function": 0,
     "react/jsx-filename-extension": 0,

@@ -17,6 +17,7 @@ export const vendorList = [
   'whatwg-fetch',
   'lodash',
   'babel-polyfill',
+  'dot-object',
 ];
 
 export default {
