@@ -1,56 +1,66 @@
 /* eslint-disable no-console, no-shadow */
-import path from 'path';
 import chalk from 'chalk';
-import webpack from 'webpack';
 import express from 'express';
 import graphQLHTTP from 'express-graphql';
-import WebpackDevServer from 'webpack-dev-server';
-import historyApiFallback from 'connect-history-api-fallback';
-import webpackConfig from '../webpack.config.babel';
+import session from 'express-session';
+import bodyParser from 'body-parser';
+import expressJwt from 'express-jwt';
 import config from './config/environment';
 import schema from './data/schema';
-import logger from './utils/logger';
+import database from './data/database';
+import {
+  getSessionData,
+} from './utils/authentication';
 
-if (config.env === 'development') {
-  // Launch GraphQL
-  const graphql = express();
-  graphql.use('/', graphQLHTTP({
-    graphiql: true,
-    pretty: true,
-    schema
-  }));
-  graphql.listen(config.graphql.port, () => logger.info('GraphQL is listening on port:', {port: config.graphql.port }));
+// GraphQL web server
+const server = express();
 
-  // Launch Relay by using webpack.config.babel.js
-  const relayServer = new WebpackDevServer(webpack(webpackConfig), {
-    publicPath: webpackConfig.output.publicPath,
-    proxy: {
-      '/graphql': `http://localhost:${config.graphql.port}`
-    },
-    stats: {
-      // Set assets to true for more detailed build log in console
-      // Keep everything else as it is
-      assets: false,
-      colors: true,
-      version: true,
-      hash: true,
-      timings: true,
-      chunks: false,
-      chunkModules: true
-    },
-    quiet: false,
-    noInfo: false,
-    hot: true,
-    historyApiFallback: true,
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({ extended: false }));
+
+const sess = {
+  secret: config.cookie.secret,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    maxAge: config.cookie.maxAge,
+  },
+};
+
+if (config.env === 'production') {
+  server.set('trust proxy', 1);
+  
+  const KnexSessionStore = require('connect-session-knex')(session); // eslint-disable-line global-require
+  
+  sess.cookie.secure = true;
+  sess.store = new KnexSessionStore({
+    tablename: 'sessions',
+    knex: database
   });
-
-  // Serve static resources
-  relayServer.use('/', express.static(path.join(__dirname, '../build')));
-  relayServer.listen(config.port, () => logger.info('Relay is listening on port:', { port: config.port }));
-} else if (config.env === 'production') {
-  const relayServer = express();
-  relayServer.use(historyApiFallback());
-  relayServer.use('/', express.static(path.join(__dirname, '../build')));
-  relayServer.use('/graphql', graphQLHTTP({ schema }));
-  relayServer.listen(config.port, () => logger.info('Relay is listening on port:', { port: config.port }));
 }
+
+server.use(session(sess));
+
+server.use(expressJwt({
+  secret: config.jwt.secret,
+  credentialsRequired: false,
+  getToken: req => req.session.token,
+}));
+
+server.use(getSessionData);
+
+const graphqlServer = graphQLHTTP((req, res) => ({
+  schema,
+  graphiql: true,
+  pretty: true,
+  rootValue: req,
+  context: {
+    request: req,
+    response: res,
+  }
+}));
+
+server.use('/', graphqlServer);
+
+server.listen(config.port, () => console.log(chalk.green(`GraphQL is listening on port ${config.port}`)));

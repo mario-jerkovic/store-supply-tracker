@@ -1,68 +1,20 @@
-# Single article in inventory
-type Article implements Node {
-  # The ID of an object
-  id: ID!
-  name: String!
-  quantity: Float!
-  created: String!
-  updated: String
-}
-
-# A connection to a list of items.
-type ArticleConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ArticleEdge]
-
-  # The number of nodes in edges array.
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type ArticleEdge {
-  # The item at the end of the edge
-  node: Article
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
 # An object with an ID
 interface Node {
   # The id of the object.
   id: ID!
 }
 
-# Information about pagination in a connection.
-type PageInfo {
-  # When paginating forwards, are there more items?
-  hasNextPage: Boolean!
-
-  # When paginating backwards, are there more items?
-  hasPreviousPage: Boolean!
-
-  # When paginating backwards, the cursor to continue.
-  startCursor: String
-
-  # When paginating forwards, the cursor to continue.
-  endCursor: String
-}
-
 type Query {
-  viewer: Viewer
-
   # Fetches an object given its ID
   node(
     # The ID of an object
     id: ID!
   ): Node
+  viewer: Viewer
 }
 
 # Single receipt
 type receipt implements Node {
-  # The ID of an object
   id: ID!
   number: String!
   total: Float!
@@ -71,67 +23,10 @@ type receipt implements Node {
   updated: String
 }
 
-# Mapping between Receipt and Article
-type ReceiptArticleMap implements Node {
-  # The ID of an object
-  id: ID!
-  receipt: receipt!
-  article: Article!
-  articlePrice: Float!
-  articleTotalPrice: Float!
-  created: String!
-  updated: String
-}
-
-# A connection to a list of items.
-type ReceiptArticleMapConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ReceiptArticleMapEdge]
-
-  # The number of nodes in edges array.
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type ReceiptArticleMapEdge {
-  # The item at the end of the edge
-  node: ReceiptArticleMap
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-# A connection to a list of items.
-type receiptConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [receiptEdge]
-
-  # The number of nodes in edges array.
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type receiptEdge {
-  # The item at the end of the edge
-  node: receipt
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
 type Viewer implements Node {
   # The ID of an object
   id: ID!
-  article(id: ID!): Article
-  articleConnection(after: String, first: Int, before: String, last: Int): ArticleConnection
+  personId: String
+  token: String
   receipt(id: ID!): receipt
-  receiptConnection(after: String, first: Int, before: String, last: Int): receiptConnection
-  receiptArticleMap(id: ID, receiptID: ID, articleID: ID): ReceiptArticleMap
-  receiptArticleMapConnection(after: String, first: Int, before: String, last: Int): ReceiptArticleMapConnection
 }

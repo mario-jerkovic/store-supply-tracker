@@ -1,14 +1,18 @@
-import Knex from 'knex';
+import knex from 'knex';
+import chalk from 'chalk';
 import config from '../config/environment';
 
-export const database = Knex(config.knex);
+const database = knex(config.knex);
 
-if (config.env === 'development') {
-	database.on('start', (builder) => {
-		const hrstart = process.hrtime();
-		builder.on('end', () => {
-			const hrend = process.hrtime(hrstart);
-			console.log(`Query "${builder.toString()}" (Execution time (hr): ${hrend[0]} ${hrend[1] / 1000000})`);
-		});
-	});
+if (process.env.NODE_ENV !== 'production') {
+  database.on('start', (builder) => {
+    const hrstart = process.hrtime();
+    builder.on('end', () => {
+      const hrend = process.hrtime(hrstart);
+      console.log(chalk.yellow(`Query (Execution time (hr): ${hrend[0]}s ${hrend[1] / 1000000}ms)`));
+      console.log(builder.toString());
+    });
+  });
 }
+
+export default database;

@@ -1,84 +1,40 @@
 import {
-	GraphQLSchema,
-	GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLObjectType,
 } from 'graphql';
-import {
-	globalIdField,
-} from 'graphql-relay';
 
-import { nodeField, nodeInterface } from './defaultDefinitions';
-export * from './defaultDefinitions';
-
-export * from './connectionDefinitions';
-
-import { queryArticle, queryArticleConnection } from './types/articleType';
-export * from './types/articleType';
-
-import { queryReceipt, queryReceiptConnection } from './types/receiptType';
-export * from './types/receiptType';
-
-import { queryReceiptArticleMap, queryReceiptArticleMapConnection } from './types/receiptArticleMapType';
-export * from './types/receiptArticleMapType';
-
-const viewerType = new GraphQLObjectType({
-	name: 'Viewer',
-	fields: () => ({
-		id: globalIdField('Viewer'),
-		article: queryArticle,
-		articleConnection: queryArticleConnection,
-		receipt: queryReceipt,
-		receiptConnection: queryReceiptConnection,
-		receiptArticleMap: queryReceiptArticleMap,
-		receiptArticleMapConnection: queryReceiptArticleMapConnection,
-	}),
-	interfaces: [nodeInterface],
-});
+import { queryViewer } from './types';
+import { nodeField } from './defaultDefinitions';
+// import * as mutations from './mutations/index';
 
 /**
  * This is the type that will be the root of our query,
  * and the entry point into our schema.
- *
- * This implements the following type system shorthand:
- *   type Query {
- *     factions(names: [FactionName]): [Faction]
- *     node(id: String!): Node
- *   }
  */
 const queryType = new GraphQLObjectType({
-	name: 'Query',
-	fields: () => ({
-		viewer: {
-			type: viewerType,
-			resolve: (rootValue, args, context, info) => ({ id: "userID" })
-		},
-		
-		node: nodeField,
-	}),
+  name: 'Query',
+  fields: () => ({
+    node: nodeField,
+    viewer: queryViewer
+  })
 });
 
 /**
  * This is the type that will be the root of our mutations,
  * and the entry point into performing writes in our schema.
- *
- * This implements the following type system shorthand:
- *   type Mutation {
- *     introduceShip(input IntroduceShipInput!): IntroduceShipPayload
- *   }
  */
-const mutationType = new GraphQLObjectType({
-	name: 'Mutation',
-	fields: () => ({
-		placeholder: require('./placeholder').default,
-	}),
-});
+// const mutationType = new GraphQLObjectType({
+//   name: 'Mutation',
+//   fields: () => ({
+//     ...mutations,
+//   })
+// });
 
 /**
- * Finally,  we construct our schema (whose starting query type is the query
+ * Finally, we construct our schema (whose starting query type is the query
  * type we defined above) and export it.
  */
-export const Schema = new GraphQLSchema({
-	query: queryType,
-	//mutation: mutationType,
+export default new GraphQLSchema({
+  query: queryType,
+  // mutation: mutationType,
 });
-
-export default Schema;
