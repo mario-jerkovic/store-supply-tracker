@@ -28,7 +28,7 @@ function getSessionData(req, res, next) {
   } else {
     try {
       const user = jwt.verify(token, config.jwt.secret); // eslint-disable-line no-param-reassign
-      console.log('USER:', user); // eslint-disable-line no-console
+      // console.log('USER:', user); // eslint-disable-line no-console
     } catch (e) {
       console.log(e); // eslint-disable-line no-console
     }

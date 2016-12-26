@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint_old": "eslint --ignore-path .gitignore server",
+    "lint": "eslint --ignore-path .gitignore server",
     "clean": "rm -rf build && mkdir build",
     "start": "nodemon --watch 'server/**/*.js' --exec \"npm run update && babel-node server/index.js\"",
     "update": "babel-node server/utils/updateSchema.js",
@@ -54,6 +54,7 @@
     "jsonwebtoken": "^7.2.1",
     "knex": "^0.12.2",
     "lodash": "^4.15.0",
+    "moment-timezone": "^0.5.11",
     "mysql": "^2.11.1",
     "pre-commit": "^1.2.2",
     "treeize": "^2.0.2",

@@ -1,10 +1,10 @@
-import fs from'fs';
-import moment from 'moment';
+import fs from 'fs';
+import moment from 'moment-timezone';
 import winston from 'winston';
 
 const dir = './logs/';
 
-if (!fs.existsSync(dir)){
+if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
 }
 
@@ -21,7 +21,7 @@ const logger = new winston.Logger({
       colorize: false,
       json: false,
       prettyPrint: true,
-      timestamp: ()=> moment().format('YYYY-MM-DD HH:mm Z'),
+      timestamp: () => moment().format('YYYY-MM-DD HH:mm Z'),
     }),
     new winston.transports.Console({
       level: 'debug',
@@ -35,7 +35,7 @@ const logger = new winston.Logger({
 });
 
 logger.stream = {
-  write: (message)=> {
+  write: (message) => {
     logger.info(message);
   },
 };

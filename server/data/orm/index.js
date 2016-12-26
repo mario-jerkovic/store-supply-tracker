@@ -1,3 +1,1 @@
-export {
-  ConvergeType,
-} from './orm';
+export ConvergeType from './orm';

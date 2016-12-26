@@ -1,6 +1,6 @@
 import {
   GraphQLID,
-  GraphQLFloat,
+  GraphQLInt,
   GraphQLString,
   GraphQLNonNull,
   GraphQLObjectType,
@@ -18,6 +18,8 @@ import {
   connectionWithCountDefinition
 } from '../schema';
 
+import * as types from './';
+
 export const receiptType = new GraphQLObjectType({
   name: 'receipt',
   sqlTable: 'receipt',
@@ -31,10 +33,11 @@ export const receiptType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     total: {
-      type: new GraphQLNonNull(GraphQLFloat),
+      type: new GraphQLNonNull(GraphQLInt),
     },
-    date: {
-      type: GraphQLString,
+    receiptArticle: {
+      type: types.receiptArticleType,
+      sqlJoin: (receiptTable, receiptArticleTable) => `${receiptTable}.id = ${receiptArticleTable}.receipt_id`
     },
     created: {
       type: new GraphQLNonNull(GraphQLString),
@@ -64,7 +67,7 @@ export const queryReceipt = {
     },
   },
   where: (usersTable, args, context) => ( // eslint-disable-line no-unused-vars
-    `${usersTable}.id = ${args.id}`
+    `${usersTable}.id = ${fromGlobalId(args.id).id}`
   ),
   // sqlJoin: (userTable, postTable) => `${userTable}.id = ${postTable}.author_id`
 };

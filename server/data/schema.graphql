@@ -1,3 +1,13 @@
+# Single article
+type article implements Node {
+  id: ID!
+  name: String!
+  quantity: Int!
+  receiptArticle: receiptArticle
+  created: String!
+  updated: String
+}
+
 # An object with an ID
 interface Node {
   # The id of the object.
@@ -17,10 +27,17 @@ type Query {
 type receipt implements Node {
   id: ID!
   number: String!
-  total: Float!
-  date: String
+  total: Int!
+  receiptArticle: receiptArticle
   created: String!
   updated: String
+}
+
+# Mapping between receipt and article type
+type receiptArticle implements Node {
+  id: ID!
+  receipt: receipt
+  article: article
 }
 
 type Viewer implements Node {
@@ -29,4 +46,6 @@ type Viewer implements Node {
   personId: String
   token: String
   receipt(id: ID!): receipt
+  article(id: ID!): article
+  receiptArticle(id: ID!): receiptArticle
 }

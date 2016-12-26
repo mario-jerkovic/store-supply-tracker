@@ -25,7 +25,9 @@ export const viewerType = new GraphQLObjectType({
     token: {
       type: GraphQLString
     },
-    receipt: new ConvergeType({ outputType: types.queryReceipt, knex: database }).outputType,
+    receipt: new ConvergeType({ outputType: types.queryReceipt, db: database }).outputType,
+    article: new ConvergeType({ outputType: types.queryArticle, db: database }).outputType,
+    receiptArticle: new ConvergeType({ outputType: types.queryReceiptArticleType, db: database }).outputType,
   }),
   interfaces: () => [nodeInterface]
 });
