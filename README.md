@@ -28,15 +28,6 @@ $ npm run deploy
 
 ## Project Structure
 
-
-    ├── client                          - All of the client side code resides in this folder
-    │   ├── assets                      - Images and fonts
-    │   ├── common                      - React components that are used trought the application
-    │   ├── routes                      - React-router-relay 
-    │   │   ├── routs.js                - All route definitions
-    │   │   └── viewerQuery.js          - Entry node of a GraphQL query
-    │   ├── index.html                  - HTML template file used by html-webpack-plugin 
-    │   └── index.js                    - Client entry point
     ├── scripts                         - Scripts
     │   └── babelRelayPlugin.js         - Babel-relay-plugin provided by Relay
     ├── server                          - All of the server side code resides in this folder
@@ -47,6 +38,4 @@ $ npm run deploy
     │   │       ├── production.js       - Production configuration
     │   │       └── test.js             - Test configuration
     │   └── index.js                    - Server entry point
-    ├── package.json                    - List of dependencies
-    ├── webpack.config.babel.js         - Webpack configuration
-    └── webpack.config.dll.babel.js     - Webpack configuration for building vendor/dll fiels for faster development build's
+    └── package.json                    - List of dependencies
