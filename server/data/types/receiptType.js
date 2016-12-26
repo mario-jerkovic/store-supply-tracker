@@ -3,20 +3,14 @@ import {
   GraphQLInt,
   GraphQLString,
   GraphQLNonNull,
+  GraphQLList,
   GraphQLObjectType,
 } from 'graphql';
 import {
   fromGlobalId,
-  globalIdField,
-  connectionArgs,
-  connectionDefinitions,
 } from 'graphql-relay';
 
 import { nodeInterface } from '../defaultDefinitions';
-import {
-  totalCountType,
-  connectionWithCountDefinition
-} from '../schema';
 
 import * as types from './';
 
@@ -29,6 +23,10 @@ export const receiptType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    receiptId: {
+      sqlColumn: 'id',
+      type: new GraphQLNonNull(GraphQLInt),
+    },
     number: {
       type: new GraphQLNonNull(GraphQLString),
     },
@@ -36,7 +34,7 @@ export const receiptType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLInt),
     },
     receiptArticle: {
-      type: types.receiptArticleType,
+      type: new GraphQLList(types.receiptArticleType),
       sqlJoin: (receiptTable, receiptArticleTable) => `${receiptTable}.id = ${receiptArticleTable}.receipt_id`
     },
     created: {
@@ -49,16 +47,6 @@ export const receiptType = new GraphQLObjectType({
   interfaces: [nodeInterface],
 });
 
-// export const {
-//   connectionType: receiptConnection,
-//   edgeType: receiptEdge
-// } = connectionDefinitions({
-//   name: 'receipt',
-//   nodeType: receiptType,
-//   connectionFields: totalCountType,
-// });
-
-
 export const queryReceipt = {
   type: receiptType,
   args: {
@@ -66,14 +54,5 @@ export const queryReceipt = {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
-  where: (usersTable, args, context) => ( // eslint-disable-line no-unused-vars
-    `${usersTable}.id = ${fromGlobalId(args.id).id}`
-  ),
-  // sqlJoin: (userTable, postTable) => `${userTable}.id = ${postTable}.author_id`
+  where: (usersTable, args, context) => `${usersTable}.id = ${fromGlobalId(args.id).id}`, // eslint-disable-line no-unused-vars
 };
-
-// export const queryReceiptConnection = {
-//   type: receiptConnection,
-//   args: connectionArgs,
-//   resolve: (rootValue, args, context, info) => connectionWithCountDefinition(Receipt, args, context, info)
-// };

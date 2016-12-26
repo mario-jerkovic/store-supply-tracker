@@ -87,16 +87,24 @@ class ConvergeType {
     const typeFields = fields();
     this.databaseTableInstance = () => this.db(sqlTable);
 
+    const isManyRelation = gqlType => (
+      (gqlType.constructor.name === 'GraphQLList')
+      // TODO add connection check
+      // ||
+      // (gqlType.constructor.name === 'GraphQLObjectType' && gqlType._typeConfig._fields.edges && gqlType._fields.pageInfo) // eslint-disable-line no-underscore-dangle
+    );
+
     Object.keys(typeFields).forEach((filedKey) => {
       if (!typeFields[filedKey].sqlIgnore) {
-        if (typeFields[filedKey].sqlColumn) {
-          sqlAST.sqlColumns.set(filedKey, {
-            column: typeFields[filedKey].sqlColumn,
-          });
-        } else if (typeof typeFields[filedKey].sqlJoin === 'function') {
+        if (typeof typeFields[filedKey].sqlJoin === 'function') {
           sqlAST.sqlJoins.set(filedKey, {
             type: typeFields[filedKey].type,
             join: typeFields[filedKey].sqlJoin,
+            many: isManyRelation(typeFields[filedKey].type),
+          });
+        } else if (typeFields[filedKey].sqlColumn) {
+          sqlAST.sqlColumns.set(filedKey, {
+            column: typeFields[filedKey].sqlColumn,
           });
         } else {
           sqlAST.sqlColumns.set(filedKey, {
@@ -132,8 +140,10 @@ class ConvergeType {
     Object.keys(parsedAST).forEach((astKey) => {
       if (this.sqlAST.sqlJoins.has(astKey) && typeRegistry.has(astKey)) {
         const registeredType = typeRegistry.get(astKey);
-        const newAliasColumn = `${aliasColumn}${astKey}:`;
-        const joinedTable = this.sqlAST.sqlJoins.get(astKey).join(`\`${aliasColumn || this.sqlAST.sqlTable}\``, `\`${newAliasColumn}\``);
+        const joinType = this.sqlAST.sqlJoins.get(astKey);
+
+        const newAliasColumn = joinType.many ? `${aliasColumn}${astKey}+:` : `${aliasColumn}${astKey}:`;
+        const joinedTable = joinType.join(`\`${aliasColumn || this.sqlAST.sqlTable}\``, `\`${newAliasColumn}\``);
 
         db.joinRaw(`LEFT JOIN \`${registeredType.sqlAST.sqlTable}\` as \`${newAliasColumn}\` ON ${joinedTable}`);
 

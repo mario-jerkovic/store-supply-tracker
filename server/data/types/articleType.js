@@ -3,6 +3,7 @@ import {
   GraphQLInt,
   GraphQLString,
   GraphQLNonNull,
+  GraphQLList,
   GraphQLObjectType,
 } from 'graphql';
 
@@ -23,6 +24,10 @@ export const articleType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    articleId: {
+      sqlColumn: 'id',
+      type: new GraphQLNonNull(GraphQLInt)
+    },
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
@@ -30,7 +35,7 @@ export const articleType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLInt),
     },
     receiptArticle: {
-      type: types.receiptArticleType,
+      type: new GraphQLList(types.receiptArticleType),
       sqlJoin: (articleTable, receiptArticleTable) => `${articleTable}.id = ${receiptArticleTable}.article_id`
     },
     created: {
@@ -50,8 +55,6 @@ export const queryArticle = {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
-  where: (usersTable, args, context) => ( // eslint-disable-line no-unused-vars
-    `${usersTable}.id = ${fromGlobalId(args.id).id}`
-  ),
+  where: (usersTable, args, context) => `${usersTable}.id = ${fromGlobalId(args.id).id}`, // eslint-disable-line no-unused-vars
 };
 

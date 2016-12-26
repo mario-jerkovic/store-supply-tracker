@@ -1,9 +1,10 @@
 # Single article
 type article implements Node {
   id: ID!
+  articleId: Int!
   name: String!
   quantity: Int!
-  receiptArticle: receiptArticle
+  receiptArticle: [receiptArticle]
   created: String!
   updated: String
 }
@@ -26,9 +27,10 @@ type Query {
 # Single receipt
 type receipt implements Node {
   id: ID!
+  receiptId: Int!
   number: String!
   total: Int!
-  receiptArticle: receiptArticle
+  receiptArticle: [receiptArticle]
   created: String!
   updated: String
 }
@@ -36,6 +38,8 @@ type receipt implements Node {
 # Mapping between receipt and article type
 type receiptArticle implements Node {
   id: ID!
+  receiptId: Int!
+  articleId: Int!
   receipt: receipt
   article: article
 }

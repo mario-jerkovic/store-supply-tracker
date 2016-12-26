@@ -1,5 +1,6 @@
 import {
   GraphQLID,
+  GraphQLInt,
   GraphQLNonNull,
   GraphQLObjectType,
 } from 'graphql';
@@ -19,6 +20,14 @@ export const receiptArticleType = new GraphQLObjectType({
   fields: () => ({
     id: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    receiptId: {
+      sqlColumn: 'receipt_id',
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    articleId: {
+      sqlColumn: 'article_id',
+      type: new GraphQLNonNull(GraphQLInt),
     },
     receipt: {
       type: types.receiptType,
