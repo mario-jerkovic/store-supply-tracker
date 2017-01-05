@@ -29,7 +29,6 @@ $ npm run deploy
 ## Project Structure
 
     ├── scripts                         - Scripts
-    │   └── babelRelayPlugin.js         - Babel-relay-plugin provided by Relay
     ├── server                          - All of the server side code resides in this folder
     │   ├── config                      - Configuration 
     │   │   └── environment             - Separate configuration for each environment

@@ -27,8 +27,8 @@ function getSessionData(req, res, next) {
     createAnonymousToken(req, res);
   } else {
     try {
-      const user = jwt.verify(token, config.jwt.secret); // eslint-disable-line no-param-reassign
-      // console.log('USER:', user); // eslint-disable-line no-console
+      const user = jwt.verify(token, config.jwt.secret); // eslint-disable-line no-unused-vars
+      // console.log('USER:', user);
     } catch (e) {
       console.log(e); // eslint-disable-line no-console
     }

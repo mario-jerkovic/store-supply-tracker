@@ -14,7 +14,7 @@ import {
 export const { nodeInterface, nodeField } = nodeDefinitions(
   async (globalId, context, info) => { // eslint-disable-line no-unused-vars
     const { type, id } = fromGlobalId(globalId);
-    console.log('type, id: ', type, id);
+    // console.log('type, id: ', type, id);
 
     // if (models[type]) {
     //   if (type === 'Viewer') { // Viewer is singeltone so we always get same

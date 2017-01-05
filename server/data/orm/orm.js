@@ -1,7 +1,16 @@
-import Treeize from 'treeize';
+import {
+  GraphQLError,
+} from 'graphql';
+import {
+  cursorToOffset,
+} from 'graphql-relay';
+import result from 'lodash/result';
 import cloneDeep from 'lodash/cloneDeep';
 import camelCase from 'lodash/camelCase';
+import nesthydration from 'nesthydrationjs';
+
 import astParser from './ASTparser';
+import postProcess from './postProcess';
 
 const typeRegistry = new Map();
 
@@ -11,33 +20,15 @@ const graphQLMetaFields = [
   '__schema',
 ];
 
-function treeize(flatData, options) {
-  const defaultOptions = {
-    input: {
-      delimiter: ':',             // delimiter between path segments, defaults to ':'
-      detectCollections: false,   // when true, plural path segments become collections
-      uniformRows: false,         // set to true if each row has identical signatures
-    },
-    output: {
-      prune: true,                // remove blank/null values and empty nodes
-      objectOverwrite: false,     // incoming objects will overwrite placeholder ids
-      resultsAsObject: false,     // root structure defaults to array (instead of object)
-    },
-    log: false,                   // enable logging
-  };
-
-  const ormData = new Treeize(options || defaultOptions);
-
-  ormData.grow(flatData);
-
-  return ormData.getData();
-}
-
 function parseAST(info) {
   const parsedAST = cloneDeep(astParser(info));
 
   (function traverseAST(rawAST) { // eslint-disable-line wrap-iife
     Object.keys(rawAST).forEach((astKey) => {
+      if (astKey === 'params') {
+        return;
+      }
+
       if (rawAST[astKey] !== null && typeof rawAST[astKey] === 'object') {
         traverseAST(rawAST[astKey]);
       } else if (graphQLMetaFields.includes(astKey)) {
@@ -51,6 +42,7 @@ function parseAST(info) {
   } else if (parsedAST.edges) {
     return parsedAST.edges.node || {};
   }
+
   return parsedAST;
 }
 
@@ -63,7 +55,7 @@ class ConvergeType {
   }
 
   generateSqlAST(type) {
-    const { sqlTable, uniqueKey, fields, name, ...other } = type._typeConfig; // eslint-disable-line no-underscore-dangle
+    const { sqlTable, uniqueKey, name, ...other } = type._typeConfig; // eslint-disable-line no-underscore-dangle
 
     if (!sqlTable) {
       throw new Error(`"sqlTable" property is not defined on ${other.name} GraphQL type.`);
@@ -84,31 +76,42 @@ class ConvergeType {
       sqlJoins: new Map(),
     };
 
-    const typeFields = fields();
+    const typeFields = type.getFields();
     this.databaseTableInstance = () => this.db(sqlTable);
 
-    const isManyRelation = gqlType => (
-      (gqlType.constructor.name === 'GraphQLList')
-      // TODO add connection check
-      // ||
-      // (gqlType.constructor.name === 'GraphQLObjectType' && gqlType._typeConfig._fields.edges && gqlType._fields.pageInfo) // eslint-disable-line no-underscore-dangle
-    );
-
-    Object.keys(typeFields).forEach((filedKey) => {
-      if (!typeFields[filedKey].sqlIgnore) {
-        if (typeof typeFields[filedKey].sqlJoin === 'function') {
-          sqlAST.sqlJoins.set(filedKey, {
-            type: typeFields[filedKey].type,
-            join: typeFields[filedKey].sqlJoin,
-            many: isManyRelation(typeFields[filedKey].type),
-          });
-        } else if (typeFields[filedKey].sqlColumn) {
-          sqlAST.sqlColumns.set(filedKey, {
-            column: typeFields[filedKey].sqlColumn,
+    Object.keys(typeFields).forEach((fieldKey) => {
+      if (!typeFields[fieldKey].sqlIgnore) {
+        if (typeof typeFields[fieldKey].sqlJoin === 'function') {
+          // one-to-many join that is defined as GraphQLList
+          if (typeFields[fieldKey].type.constructor.name === 'GraphQLList') {
+            sqlAST.sqlJoins.set(fieldKey, {
+              type: typeFields[fieldKey].type.ofType,
+              join: typeFields[fieldKey].sqlJoin,
+              many: true,
+            });
+            // one-to-many join that is defined  as GraphQL-relay connection
+          } else if (typeFields[fieldKey].type.constructor.name === 'GraphQLObjectType' && typeFields[fieldKey].type.getFields().edges && typeFields[fieldKey].type.getFields().pageInfo) {
+            sqlAST.sqlJoins.set(fieldKey, {
+              type: typeFields[fieldKey].type.getFields().edges.type.ofType.getFields().node.type,
+              join: typeFields[fieldKey].sqlJoin,
+              many: true,
+              paginate: typeFields[fieldKey].paginate || false,
+            });
+            // one-to-one join that is defined as GraphQLObjectType || another GraphQL type
+          } else {
+            sqlAST.sqlJoins.set(fieldKey, {
+              type: typeFields[fieldKey].type,
+              join: typeFields[fieldKey].sqlJoin,
+              many: false,
+            });
+          }
+        } else if (typeFields[fieldKey].sqlColumn) {
+          sqlAST.sqlColumns.set(fieldKey, {
+            column: typeFields[fieldKey].sqlColumn,
           });
         } else {
-          sqlAST.sqlColumns.set(filedKey, {
-            column: filedKey,
+          sqlAST.sqlColumns.set(fieldKey, {
+            column: fieldKey,
           });
         }
       }
@@ -126,34 +129,95 @@ class ConvergeType {
   generateOutputType(type) {
     return {
       ...type,
-      resolve: async (source, args, context, info) => {
+      resolve: async(source, args, context, info) => {
         const db = this.tableInstance;
+        const parsedAST = parseAST(info);
 
-        this.resolveModel(parseAST(info), db);
+        this.resolveModel(parsedAST, db);
 
-        return await db.whereRaw(type.where(this.sqlAST.sqlTable, args, context)).then(res => treeize(res)[0]);
+        return await db.whereRaw(type.where(this.sqlAST.sqlTable, args, context)).then((res) => {
+          const nestRes = nesthydration().nest(res);
+          // TODO:
+          // Remove hard-coded value
+          postProcess(nestRes, parsedAST.receipt);
+
+          return nestRes[0];
+        });
       },
     };
   }
 
-  generateJoins = (db, parsedAST, aliasColumn = '') => {
-    Object.keys(parsedAST).forEach((astKey) => {
-      if (this.sqlAST.sqlJoins.has(astKey) && typeRegistry.has(astKey)) {
-        const registeredType = typeRegistry.get(astKey);
-        const joinType = this.sqlAST.sqlJoins.get(astKey);
+  processPagination = (table, parsedAST, params = {}) => {
+    if (params.after && params.before) {
+      throw new GraphQLError('Arguments "after" and "before" cannot be used at the same time');
+    }
+    if (params.first && params.last) {
+      throw new GraphQLError('Arguments "first" and "last" cannot be used at the same time');
+    }
+    if (params.after && (params.last || !params.first)) {
+      throw new GraphQLError('Argument "after" can only be used along with argument "first"');
+    }
+    if (params.before && (params.first || !params.last)) {
+      throw new GraphQLError('Argument "before" can only be used along with argument "last"');
+    }
 
-        const newAliasColumn = joinType.many ? `${aliasColumn}${astKey}+:` : `${aliasColumn}${astKey}:`;
-        const joinedTable = joinType.join(`\`${aliasColumn || this.sqlAST.sqlTable}\``, `\`${newAliasColumn}\``);
+    let limit = '';
+    let offset = '';
 
-        db.joinRaw(`LEFT JOIN \`${registeredType.sqlAST.sqlTable}\` as \`${newAliasColumn}\` ON ${joinedTable}`);
+    if (params.first >= 0) {
+      limit = `LIMIT ${params.first}`;
+    }
 
-        typeRegistry.get(astKey).resolveModel(parsedAST[astKey], db, `${newAliasColumn}`, '');
+    if (params.after) {
+      offset = `OFFSET ${cursorToOffset(params.after)}`;
+    }
+
+    return {
+      query: `(SELECT * FROM \`${table}\` ${limit} ${offset})`,
+      parsedAST: result(parsedAST, 'fields.edges.fields')
+    };
+  };
+
+  generateJoins = (db, parsedAST, aliasColumn = '_') => {
+    const parsedASTFields = parsedAST.fields;
+
+    Object.keys(parsedASTFields).forEach((astKey) => {
+      const sqlASTJoin = this.sqlAST.sqlJoins.get(astKey) || null;
+
+      if (sqlASTJoin && typeRegistry.has(sqlASTJoin.type.name)) {
+        const newAliasColumn = (sqlASTJoin.many || sqlASTJoin.paginate) ? `${aliasColumn}${astKey}__` : `${aliasColumn}${astKey}_`;
+
+        let leftTable = typeRegistry.get(sqlASTJoin.type.name).sqlAST.sqlTable;
+        let processedAST = Object.assign({}, { [astKey]: parsedASTFields[astKey] });
+        const rightTable = sqlASTJoin.join(`\`${aliasColumn !== '_' ? aliasColumn : this.sqlAST.sqlTable}\``, `\`${newAliasColumn}\``);
+
+        if (sqlASTJoin.paginate) {
+          const processedPagination = this.processPagination(leftTable, parsedASTFields[astKey], processedAST[astKey].params);
+          // TODO:
+          // Need to clean up this function call
+          // it is used to get the correct totalCount for connection one-to-many join
+          // const totalCountQuery = `(
+          //   SELECT count(*) from \`${leftTable}\`
+          //   WHERE ${join(`\`${aliasColumn || this.sqlAST.sqlTable}\``, `\`${leftTable}\``)}
+          // ) AS \`${aliasColumn}${astKey}:$totalCount\``;
+          //
+          // db.select(this.db.raw(totalCountQuery.replace(/\n/g, '').replace(/\t/g, ' ')));
+
+          leftTable = processedPagination.query;
+          processedAST = processedPagination.parsedAST;
+        }
+
+        db.joinRaw(`LEFT JOIN ${leftTable} AS \`${newAliasColumn}\` ON ${rightTable}`);
+
+        typeRegistry.get(sqlASTJoin.type.name).resolveModel(processedAST, db, `${newAliasColumn}`, '');
       }
     });
   };
 
-  generateSelect = (db, parsedAST, aliasColumn = '') => {
-    Object.keys(parsedAST).forEach((astKey) => {
+  generateSelect = (db, parsedAST, aliasColumn = '_') => {
+    Object.keys(parsedAST.fields).forEach((astKey) => {
+      const newAliasColumn = aliasColumn !== '_' ? aliasColumn : this.sqlAST.sqlTable;
+
       if (astKey === 'id') {
         const typeName = camelCase(this.sqlAST.sqlTable);
         const variables = [`'${typeName.charAt(0).toUpperCase() + typeName.slice(1)}'`];
@@ -161,23 +225,27 @@ class ConvergeType {
         if (Array.isArray(this.sqlAST.uniqueKey)) {
           this.sqlAST.uniqueKey.forEach((key) => {
             variables.push('\':\'');
-            variables.push(`\`${aliasColumn || this.sqlAST.sqlTable}\`.\`${key}\``);
+            variables.push(`\`${newAliasColumn}\`.\`${key}\``);
           });
         } else {
           variables.push('\':\'');
-          variables.push(`\`${aliasColumn || this.sqlAST.sqlTable}\`.\`${this.sqlAST.uniqueKey}\``);
+          variables.push(`\`${newAliasColumn}\`.\`${this.sqlAST.uniqueKey}\``);
         }
 
-        db.select(this.db.raw(`TO_BASE64(concat(${variables.join()})) as \`${aliasColumn}${astKey}\``));
+        db.select(this.db.raw(`TO_BASE64(concat(${variables.join()})) AS \`${aliasColumn}${astKey}\``));
       } else if (this.sqlAST.sqlColumns.has(astKey)) {
-        db.select(this.db.raw(`\`${aliasColumn || this.sqlAST.sqlTable}\`.\`${this.sqlAST.sqlColumns.get(astKey).column}\` as \`${aliasColumn}${astKey}\``));
+        db.select(this.db.raw(`\`${newAliasColumn}\`.\`${this.sqlAST.sqlColumns.get(astKey).column}\` AS \`${aliasColumn}${astKey}\``));
       }
     });
   };
 
   resolveModel = (parsedAST, db = this.tableInstance, aliasColumn) => {
-    this.generateJoins(db, parsedAST, aliasColumn);
-    this.generateSelect(db, parsedAST, aliasColumn);
+    Object.keys(parsedAST).forEach((parsedASTKey) => {
+      if (parsedAST[parsedASTKey].fields) {
+        this.generateSelect(db, parsedAST[parsedASTKey], aliasColumn);
+        this.generateJoins(db, parsedAST[parsedASTKey], aliasColumn);
+      }
+    });
 
     return db;
   };

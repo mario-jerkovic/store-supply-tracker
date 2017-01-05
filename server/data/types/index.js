@@ -8,6 +8,7 @@ export {
 } from './articleType';
 export {
   receiptArticleType,
+  receiptArticleConnection,
   queryReceiptArticleType,
 } from './receiptArticleType';
 export {

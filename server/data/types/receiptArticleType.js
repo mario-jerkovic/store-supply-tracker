@@ -6,6 +6,7 @@ import {
 } from 'graphql';
 import {
   fromGlobalId,
+  connectionDefinitions,
 } from 'graphql-relay';
 
 import { nodeInterface } from '../defaultDefinitions';
@@ -40,6 +41,8 @@ export const receiptArticleType = new GraphQLObjectType({
   }),
   interfaces: [nodeInterface],
 });
+
+export const { connectionType: receiptArticleConnection } = connectionDefinitions({ nodeType: receiptArticleType });
 
 export const queryReceiptArticleType = {
   type: receiptArticleType,

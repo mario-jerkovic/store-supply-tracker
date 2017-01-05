@@ -8,6 +8,7 @@ import {
 } from 'graphql';
 import {
   fromGlobalId,
+  forwardConnectionArgs,
 } from 'graphql-relay';
 
 import { nodeInterface } from '../defaultDefinitions';
@@ -35,6 +36,12 @@ export const receiptType = new GraphQLObjectType({
     },
     receiptArticle: {
       type: new GraphQLList(types.receiptArticleType),
+      sqlJoin: (receiptTable, receiptArticleTable) => `${receiptTable}.id = ${receiptArticleTable}.receipt_id`
+    },
+    receiptArticleConnection: {
+      type: types.receiptArticleConnection,
+      args: forwardConnectionArgs,
+      paginate: true,
       sqlJoin: (receiptTable, receiptArticleTable) => `${receiptTable}.id = ${receiptArticleTable}.receipt_id`
     },
     created: {
