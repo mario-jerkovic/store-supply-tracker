@@ -1,5 +1,3 @@
-/* eslint-disable no-console, no-shadow */
-import chalk from 'chalk';
 import express from 'express';
 import graphQLHTTP from 'express-graphql';
 import session from 'express-session';
@@ -9,8 +7,9 @@ import config from './config/environment';
 import schema from './data/schema';
 import database from './data/database';
 import {
+  logger,
   getSessionData,
-} from './utils/authentication';
+} from './utils';
 
 // GraphQL web server
 const server = express();
@@ -30,9 +29,9 @@ const sess = {
 
 if (config.env === 'production') {
   server.set('trust proxy', 1);
-  
+
   const KnexSessionStore = require('connect-session-knex')(session); // eslint-disable-line global-require
-  
+
   sess.cookie.secure = true;
   sess.store = new KnexSessionStore({
     tablename: 'sessions',
@@ -63,4 +62,4 @@ const graphqlServer = graphQLHTTP((req, res) => ({
 
 server.use('/', graphqlServer);
 
-server.listen(config.port, () => console.log(chalk.green(`GraphQL is listening on port ${config.port}`)));
+server.listen(config.port, () => logger.info(`GraphQL is listening on port ${config.port}`));

@@ -1,5 +1,5 @@
 import {
-  fromGlobalId,
+  // fromGlobalId,
   nodeDefinitions,
 } from 'graphql-relay';
 
@@ -12,8 +12,8 @@ import {
  * The second defines the way we resolve an object to its GraphQL type.
  */
 export const { nodeInterface, nodeField } = nodeDefinitions(
-  async (globalId, context, info) => { // eslint-disable-line no-unused-vars
-    const { type, id } = fromGlobalId(globalId);
+  async (globalId, context, info) => { // eslint-disable-line no-unused-vars, arrow-body-style
+    // const { type, id } = fromGlobalId(globalId);
     // console.log('type, id: ', type, id);
 
     // if (models[type]) {

@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/environment';
+import {
+  logger,
+} from './';
 
 const ANONYMOUS_TOKEN_DATA = {
   personId: null,
@@ -30,7 +33,7 @@ function getSessionData(req, res, next) {
       const user = jwt.verify(token, config.jwt.secret); // eslint-disable-line no-unused-vars
       // console.log('USER:', user);
     } catch (e) {
-      console.log(e); // eslint-disable-line no-console
+      logger.error(e);
     }
   }
 
