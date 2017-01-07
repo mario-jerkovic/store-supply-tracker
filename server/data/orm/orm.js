@@ -137,9 +137,8 @@ class ConvergeType {
 
         return await db.whereRaw(type.where(this.sqlAST.sqlTable, args, context)).then((res) => {
           const nestRes = nesthydration().nest(res);
-          // TODO:
-          // Remove hard-coded value
-          postProcess(nestRes, parsedAST.receipt);
+
+          postProcess(nestRes, parsedAST[Object.keys(parsedAST)[0]] || {});
 
           return nestRes[0];
         });
@@ -174,13 +173,12 @@ class ConvergeType {
 
     return {
       query: `(SELECT * FROM \`${table}\` ${limit} ${offset})`,
-      parsedAST: result(parsedAST, 'fields.edges.fields')
+      parsedAST: result(parsedAST, 'fields.edges.fields', {})
     };
   };
 
   generateJoins = (db, parsedAST, aliasColumn = '_') => {
     const parsedASTFields = parsedAST.fields;
-
     Object.keys(parsedASTFields).forEach((astKey) => {
       const sqlASTJoin = this.sqlAST.sqlJoins.get(astKey) || null;
 
@@ -189,17 +187,16 @@ class ConvergeType {
 
         let leftTable = typeRegistry.get(sqlASTJoin.type.name).sqlAST.sqlTable;
         let processedAST = Object.assign({}, { [astKey]: parsedASTFields[astKey] });
-        const rightTable = sqlASTJoin.join(`\`${aliasColumn !== '_' ? aliasColumn : this.sqlAST.sqlTable}\``, `\`${newAliasColumn}\``);
+        const joinColumn = aliasColumn !== '_' ? aliasColumn : this.sqlAST.sqlTable;
+        const rightTable = sqlASTJoin.join(`\`${joinColumn}\``, `\`${newAliasColumn}\``);
 
         if (sqlASTJoin.paginate) {
           const processedPagination = this.processPagination(leftTable, parsedASTFields[astKey], processedAST[astKey].params);
-          // TODO:
-          // Need to clean up this function call
-          // it is used to get the correct totalCount for connection one-to-many join
+
           // const totalCountQuery = `(
           //   SELECT count(*) from \`${leftTable}\`
-          //   WHERE ${join(`\`${aliasColumn || this.sqlAST.sqlTable}\``, `\`${leftTable}\``)}
-          // ) AS \`${aliasColumn}${astKey}:$totalCount\``;
+          //   WHERE ${sqlASTJoin.join(`\`${joinColumn}\``, `\`${leftTable}\``)}
+          // ) AS \`${newAliasColumn}totalCount\``;
           //
           // db.select(this.db.raw(totalCountQuery.replace(/\n/g, '').replace(/\t/g, ' ')));
 
@@ -252,3 +249,12 @@ class ConvergeType {
 }
 
 export default ConvergeType;
+
+// TODO:
+// NOW: API improvements: create only one instance of ORM (pass in constructor db instance), call converge method to generate sqlAST for passed type
+// 1. add add sqlJoins array so that one can defined more that one join
+// 2. add orderBy key so that is possible to define default sort of an connection or Array/List
+// 3. add pagination to GraphQLList type
+// 4. updated orm so that the connections can be defined on root/viewer type
+// 5. updated orm that he adds `totalCount` when he hits connectionType
+// 6. fix getting type from node type (defaultDefinitions)

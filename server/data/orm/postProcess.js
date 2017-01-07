@@ -50,9 +50,6 @@ function calculateOffset(arraySliceLength, args) {
   };
 }
 
-// TODO:
-// Think about how to implement backward pagination
-// Try to use different approach to generate cursors and/or pageInfo
 function recurseOnObjInData(dataObj, parsedAST) {
   Object.keys(dataObj).forEach((dataObjKey) => {
     const astFields = parsedAST.fields[dataObjKey];
@@ -64,13 +61,13 @@ function recurseOnObjInData(dataObj, parsedAST) {
     ) : false;
 
     if (isCollection && isConnection) {
-      const data = dataObj[dataObjKey]; // eslint-disable-line dot-notation
+      const data = dataObj[dataObjKey];
 
       const { startOffset, pageInfo } = calculateOffset(data.length, parsedAST.fields[dataObjKey].params || {});
 
       const edges = data.map((value, index) => ({
         cursor: offsetToCursor(startOffset + index),
-        node: postProcess(value, astFields.fields.edges.fields.node),
+        node: astFields.fields.edges && astFields.fields.edges.fields.node ? postProcess(value, astFields.fields.edges.fields.node) : null,
       }));
 
       const firstEdge = edges[0];
@@ -103,3 +100,8 @@ function postProcess(data, parsedAST) {
 }
 
 export default postProcess;
+
+// TODO:
+// 1. implement backward pagination
+// 2. think about different approach on how to generate cursors and/or pageInfo
+// 3. add totalCount key on root dataObject
